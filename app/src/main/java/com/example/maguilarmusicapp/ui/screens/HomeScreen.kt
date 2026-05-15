@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -155,7 +156,7 @@ fun AlbumCard(album: Album, onClick: () -> Unit) {
         modifier = Modifier
             .size(160.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.LightGray)
+            .background(Color.White)
             .clickable { onClick() }
     ) {
         AsyncImage(
@@ -164,49 +165,53 @@ fun AlbumCard(album: Album, onClick: () -> Unit) {
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
-        
-        // Overlay for text
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
-                        startY = 200f
-                    )
-                )
-        )
 
-        Column(
+        // Text Overlay Container
+        Box(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(12.dp)
+                .padding(8.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.Black.copy(alpha = 0.5f))
+                .padding(8.dp)
         ) {
-            Text(
-                text = album.title,
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1
-            )
-            Text(
-                text = album.artist,
-                color = Color.White.copy(alpha = 0.7f),
-                fontSize = 12.sp,
-                maxLines = 1
-            )
-        }
-        
-        // Play button placeholder
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(12.dp)
-                .size(32.dp)
-                .background(Color.White, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = album.title,
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                    Text(
+                        text = album.artist,
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 10.sp,
+                        maxLines = 1
+                    )
+                }
+
+                // Small Circular Play Button
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .background(Color.White, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        tint = Color.Black,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -248,7 +253,7 @@ fun RecentlyPlayedItem(album: Album, onClick: () -> Unit) {
                 )
             }
             Icon(
-                imageVector = Icons.Default.Menu,
+                imageVector = Icons.Default.MoreVert,
                 contentDescription = null,
                 tint = TextGray,
                 modifier = Modifier.size(20.dp)
