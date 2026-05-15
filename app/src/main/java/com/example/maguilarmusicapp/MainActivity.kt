@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.maguilarmusicapp.navigation.AppNavHost
 import com.example.maguilarmusicapp.ui.components.MiniPlayer
 import com.example.maguilarmusicapp.ui.screens.HomeScreen
 import com.example.maguilarmusicapp.ui.theme.MAguilarMusicAppTheme
@@ -26,7 +27,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
-                        HomeScreen()
+                        AppNavHost()
                         MiniPlayer(modifier = Modifier.align(Alignment.BottomCenter))
                     }
                 }
@@ -41,7 +42,7 @@ fun HomePreview() {
     MAguilarMusicAppTheme {
         Scaffold { padding ->
             Box(modifier = Modifier.padding(padding)) {
-                HomeScreen()
+                HomeScreen(onAlbumClick = {})
                 MiniPlayer(modifier = Modifier.align(Alignment.BottomCenter))
             }
         }

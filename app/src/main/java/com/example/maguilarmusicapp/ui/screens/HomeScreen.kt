@@ -1,6 +1,7 @@
 package com.example.maguilarmusicapp.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -26,7 +27,7 @@ import com.example.maguilarmusicapp.ui.theme.PrimaryPurple
 import com.example.maguilarmusicapp.ui.theme.TextGray
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onAlbumClick: (Int) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -81,8 +82,8 @@ fun HomeScreen() {
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedCorner(16.dp)
                 ) {
-                    items(5) {
-                        AlbumCardSkeleton()
+                    items(5) { index ->
+                        AlbumCardSkeleton(onClick = { onAlbumClick(index) })
                     }
                 }
             }
@@ -92,8 +93,8 @@ fun HomeScreen() {
                 SectionHeader(title = "Recently Played")
             }
 
-            items(10) {
-                RecentlyPlayedItemSkeleton()
+            items(10) { index ->
+                RecentlyPlayedItemSkeleton(onClick = { onAlbumClick(index + 10) })
             }
         }
     }
@@ -118,12 +119,13 @@ fun SectionHeader(title: String) {
 }
 
 @Composable
-fun AlbumCardSkeleton() {
+fun AlbumCardSkeleton(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(160.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(Color.LightGray)
+            .clickable { onClick() }
     ) {
         Column(
             modifier = Modifier
@@ -158,11 +160,12 @@ fun AlbumCardSkeleton() {
 }
 
 @Composable
-fun RecentlyPlayedItemSkeleton() {
+fun RecentlyPlayedItemSkeleton(onClick: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clickable { onClick() },
         color = CardWhite,
         shape = RoundedCornerShape(16.dp),
         shadowElevation = 2.dp
