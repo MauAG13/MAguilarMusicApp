@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -12,22 +13,40 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import com.example.maguilarmusicapp.model.Album
+import com.example.maguilarmusicapp.network.RetrofitInstance
 import com.example.maguilarmusicapp.ui.theme.BackgroundLavender
 import com.example.maguilarmusicapp.ui.theme.CardWhite
 import com.example.maguilarmusicapp.ui.theme.PrimaryPurple
 import com.example.maguilarmusicapp.ui.theme.TextGray
 
 @Composable
-fun HomeScreen(onAlbumClick: (Int) -> Unit) {
+fun HomeScreen(onAlbumClick: (String) -> Unit) {
+    var albums by remember { mutableStateOf<List<Album>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        try {
+            albums = RetrofitInstance.api.getAlbums()
+            isLoading = false
+        } catch (e: Exception) {
+            errorMessage = "Error loading albums: ${e.message}"
+            isLoading = false
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -75,26 +94,38 @@ fun HomeScreen(onAlbumClick: (Int) -> Unit) {
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 100.dp) // Space for MiniPlayer
         ) {
-            // Albums Section
-            item {
-                SectionHeader(title = "Albums")
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedCorner(16.dp)
-                ) {
-                    items(5) { index ->
-                        AlbumCardSkeleton(onClick = { onAlbumClick(index) })
+            if (isLoading) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = PrimaryPurple)
                     }
                 }
-            }
+            } else if (errorMessage != null) {
+                item {
+                    Text(text = errorMessage!!, modifier = Modifier.padding(16.dp), color = Color.Red)
+                }
+            } else {
+                // Albums Section
+                item {
+                    SectionHeader(title = "Albums")
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedCorner(16.dp)
+                    ) {
+                        items(albums) { album ->
+                            AlbumCard(album = album, onClick = { onAlbumClick(album.id) })
+                        }
+                    }
+                }
 
-            // Recently Played Section
-            item {
-                SectionHeader(title = "Recently Played")
-            }
+                // Recently Played Section
+                item {
+                    SectionHeader(title = "Recently Played")
+                }
 
-            items(10) { index ->
-                RecentlyPlayedItemSkeleton(onClick = { onAlbumClick(index + 10) })
+                items(albums) { album ->
+                    RecentlyPlayedItem(album = album, onClick = { onAlbumClick(album.id) })
+                }
             }
         }
     }
@@ -119,7 +150,7 @@ fun SectionHeader(title: String) {
 }
 
 @Composable
-fun AlbumCardSkeleton(onClick: () -> Unit) {
+fun AlbumCard(album: Album, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(160.dp)
@@ -127,21 +158,42 @@ fun AlbumCardSkeleton(onClick: () -> Unit) {
             .background(Color.LightGray)
             .clickable { onClick() }
     ) {
+        AsyncImage(
+            model = album.cover_url,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        
+        // Overlay for text
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
+                        startY = 200f
+                    )
+                )
+        )
+
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(12.dp)
         ) {
             Text(
-                text = "Título",
+                text = album.title,
                 color = Color.White,
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
             )
             Text(
-                text = "Artista",
+                text = album.artist,
                 color = Color.White.copy(alpha = 0.7f),
-                fontSize = 12.sp
+                fontSize = 12.sp,
+                maxLines = 1
             )
         }
         
@@ -160,7 +212,7 @@ fun AlbumCardSkeleton(onClick: () -> Unit) {
 }
 
 @Composable
-fun RecentlyPlayedItemSkeleton(onClick: () -> Unit) {
+fun RecentlyPlayedItem(album: Album, onClick: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -174,27 +226,29 @@ fun RecentlyPlayedItemSkeleton(onClick: () -> Unit) {
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
+            AsyncImage(
+                model = album.cover_url,
+                contentDescription = null,
                 modifier = Modifier
                     .size(50.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.LightGray)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Título",
+                    text = album.title,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Artista • Popular Song",
+                    text = "${album.artist} • Popular Song",
                     color = TextGray,
                     fontSize = 12.sp
                 )
             }
             Icon(
-                imageVector = Icons.Default.Menu, // More vertical icon would be better
+                imageVector = Icons.Default.Menu,
                 contentDescription = null,
                 tint = TextGray,
                 modifier = Modifier.size(20.dp)

@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 object HomeRoute
 
 @Serializable
-data class DetailRoute(val id: Int)
+data class DetailRoute(val id: String)
 
 @Composable
 fun AppNavHost() {
