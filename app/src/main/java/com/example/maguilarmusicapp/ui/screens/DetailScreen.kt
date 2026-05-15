@@ -74,7 +74,8 @@ fun DetailScreen(albumId: String, onBack: () -> Unit) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(350.dp)
+                                .height(400.dp)
+                                .clip(RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp))
                         ) {
                             AsyncImage(
                                 model = album.cover_url,
@@ -83,14 +84,18 @@ fun DetailScreen(albumId: String, onBack: () -> Unit) {
                                 contentScale = ContentScale.Crop
                             )
                             
-                            // Scrim/Gradient Overlay at the bottom
+                            // Purple Scrim / Gradient Overlay
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .background(
                                         Brush.verticalGradient(
-                                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
-                                            startY = 500f
+                                            colors = listOf(
+                                                Color.Transparent,
+                                                PrimaryPurple.copy(alpha = 0.4f),
+                                                PrimaryPurple.copy(alpha = 0.9f)
+                                            ),
+                                            startY = 400f
                                         )
                                     )
                             )
@@ -133,17 +138,37 @@ fun DetailScreen(albumId: String, onBack: () -> Unit) {
                                     color = Color.White.copy(alpha = 0.8f),
                                     fontSize = 16.sp
                                 )
-                                Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(20.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
+                                    // Primary Play Button (Purple/Blueish)
                                     IconButton(
                                         onClick = { /* TODO */ },
                                         modifier = Modifier
-                                            .size(48.dp)
+                                            .size(56.dp)
                                             .background(PrimaryPurple, CircleShape)
                                     ) {
-                                        Icon(Icons.Default.PlayArrow, contentDescription = "Play", tint = Color.White)
+                                        Icon(
+                                            imageVector = Icons.Default.PlayArrow,
+                                            contentDescription = "Play",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(32.dp)
+                                        )
                                     }
-                                    // ... other buttons if needed
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    // Shuffle/Secondary Play Button (White)
+                                    IconButton(
+                                        onClick = { /* TODO */ },
+                                        modifier = Modifier
+                                            .size(56.dp)
+                                            .background(Color.White, CircleShape)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PlayArrow, // Using Play as shuffle placeholder from mock
+                                            contentDescription = "Shuffle",
+                                            tint = PrimaryPurple,
+                                            modifier = Modifier.size(28.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -197,7 +222,7 @@ fun DetailScreen(albumId: String, onBack: () -> Unit) {
 
                     // Track List
                     items(album.tracks) { track ->
-                        TrackItem(track = track, artist = album.artist)
+                        TrackItem(track = track, artist = album.artist, coverUrl = album.cover_url)
                     }
                 }
             }
@@ -206,7 +231,7 @@ fun DetailScreen(albumId: String, onBack: () -> Unit) {
 }
 
 @Composable
-fun TrackItem(track: Track, artist: String) {
+fun TrackItem(track: Track, artist: String, coverUrl: String) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -219,17 +244,18 @@ fun TrackItem(track: Track, artist: String) {
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Smaller placeholder or art for track
-            Box(
+            AsyncImage(
+                model = coverUrl,
+                contentDescription = null,
                 modifier = Modifier
                     .size(50.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.LightGray)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = track.title,
+                    text = "${track.title} • Track ${track.id}",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
